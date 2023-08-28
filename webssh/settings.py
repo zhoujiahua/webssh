@@ -19,13 +19,13 @@ def print_version(flag):
         sys.exit(0)
 
 
-define('address', default='', help='Listen address')
-define('port', type=int, default=8888,  help='Listen port')
+define('address', default='0.0.0.0', help='Listen address')
+define('port', type=int, default=8000,  help='Listen port')
 define('ssladdress', default='', help='SSL listen address')
 define('sslport', type=int, default=4433,  help='SSL listen port')
 define('certfile', default='', help='SSL certificate file')
 define('keyfile', default='', help='SSL private key file')
-define('debug', type=bool, default=False, help='Debug mode')
+define('debug', type=bool, default=True, help='Debug mode')
 define('policy', default='warning',
        help='Missing host key policy, reject|autoadd|warning')
 define('hostfile', default='', help='User defined host keys file')

@@ -386,7 +386,7 @@ jQuery(function($){
     term.fitAddon = new window.FitAddon.FitAddon();
     term.loadAddon(term.fitAddon);
 
-    console.log(url);
+    console.log('ajax_complete_callback', url);
     if (!msg.encoding) {
       console.log('Unable to detect the default encoding of your server');
       msg.encoding = encoding;
@@ -522,11 +522,12 @@ jQuery(function($){
     };
 
     term.onData(function(data) {
-      // console.log(data);
+      console.log('term.onData',data);
       sock.send(JSON.stringify({'data': data}));
     });
 
     sock.onopen = function() {
+      console.log('sock.onopen')
       term.open(terminal);
       toggle_fullscreen(term);
       update_font_family(term);
@@ -541,6 +542,7 @@ jQuery(function($){
     };
 
     sock.onmessage = function(msg) {
+      console.log('sock.onmessage', msg)
       read_file_as_text(msg.data, term_write, decoder);
     };
 
