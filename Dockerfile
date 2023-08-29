@@ -3,6 +3,12 @@ FROM python:3-alpine
 LABEL maintainer='<author>'
 LABEL version='0.0.0-dev.0-build.0'
 
+# 设置 Python 源为清华大学的源
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 设置 Alpine 软件源为国内源
+RUN set -eux && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+
 ADD . /code
 WORKDIR /code
 RUN \
