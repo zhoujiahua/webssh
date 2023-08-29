@@ -1,94 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8">
     <title> WebSSH </title>
     <link href="static/img/favicon.png" rel="icon" type="image/png">
-    <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="static/css/xterm.min.css" rel="stylesheet" type="text/css"/>
-    <link href="static/css/fullscreen.min.css" rel="stylesheet" type="text/css"/>
+    <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="static/css/xterm.min.css" rel="stylesheet" type="text/css" />
+    <link href="static/css/fullscreen.min.css" rel="stylesheet" type="text/css" />
     <style>
-      .row {
-        margin-top: 15px;
-        margin-bottom: 10px;
-      }
+        .row {
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
 
-      .container {
-        margin-top: 20px;
-      }
+        .container {
+            margin-top: 20px;
+        }
 
-      .btn {
-        margin-top: 15px;
-      }
+        .btn {
+            margin-top: 15px;
+        }
 
-      .btn-danger {
-        margin-left: 5px;
-      }
-      {% if font.family %}
-      @font-face {
-        font-family: '{{ font.family }}';
-        src: url('{{ font.url }}');
-      }
-
-      body {
-        font-family: '{{ font.family }}';
-      }
-      {% end %}
+        .btn-danger {
+            margin-left: 5px;
+        }
     </style>
-  </head>
-  <body>
-    <div id="waiter" style="display: none"> Connecting ... </div>
+</head>
 
-    <div class="container form-container" style="display: none">
-      <form id="connect" action="" method="post" enctype="multipart/form-data"{% if debug %} novalidate{% end %}>
-        <div class="row">
-          <div class="col">
-            <label for="Hostname">Hostname</label>
-            <input class="form-control" type="text" id="hostname" name="hostname" value="" required>
-          </div>
-          <div class="col">
-            <label for="Port">Port</label>
-            <input class="form-control" type="number" id="port" name="port" placeholder="22" value="" min=1 max=65535>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="Username">Username</label>
-            <input class="form-control" type="text" id="username" name="username" value="" required>
-          </div>
-          <div class="col">
-            <label for="Password">Password</label>
-            <input class="form-control" type="password" id="password" name="password" value="">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="Username">Private Key</label>
-            <input class="form-control" type="file" id="privatekey" name="privatekey" value="">
-          </div>
-          <div class="col">
-            <label for="Passphrase">Passphrase</label>
-            <input class="form-control" type="password" id="passphrase" name="passphrase" value="">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="totp">Totp (time-based one-time password)</label>
-            <input class="form-control" type="password" id="totp" name="totp" value="">
-          </div>
-          <div class="col">
-          </div>
-        </div>
-        <input type="hidden" id="term" name="term" value="xterm-256color">
-        {% module xsrf_form_html() %}
-        <button type="submit" class="btn btn-primary">Connect</button>
-        <button type="reset" class="btn btn-danger">Reset</button>
-      </form>
-    </div>
-
+<body>
+    <button type="button" id="btn">SendMessage</button>
     <div class="container">
-      <div id="status" style="color: red;"></div>
-      <div id="terminal"></div>
+        <div id="terminal"></div>
     </div>
 
     <script src="static/js/jquery.min.js"></script>
@@ -96,6 +39,201 @@
     <script src="static/js/bootstrap.min.js"></script>
     <script src="static/js/xterm.min.js"></script>
     <script src="static/js/xterm-addon-fit.min.js"></script>
-    <script src="static/js/main.js"></script>
-  </body>
+    <script>
+        $(function () {
+            var sock = null;
+            var term = new Terminal(); // Create a new Terminal instance
+            var terminal = document.getElementById('terminal');
+            loginWebSSH();
+
+            // Attach the Terminal instance to the terminal-container element
+            // term.open(terminal);
+            // term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
+
+            // Set terminal options (if needed)
+            // term.setOption('fontSize', 16);
+            // term.setOption('theme', {background: '#000', foreground: '#fff'});
+
+            // Perform other terminal-related actions here
+
+            // Write text to the terminal
+            // term.write('Welcome to xterm.js with jQuery integration!\n');
+
+            // Handle user input
+            // term.onData(function (data) {
+
+            //     // Process user input here
+            // });
+            // function runFakeTerminal() {
+            //     if (term._initialized) {
+            //         return;
+            //     }
+
+            //     term._initialized = true;
+
+            //     term.prompt = () => {
+            //         term.write('\r\n$ ');
+            //     };
+
+            //     term.writeln('Welcome to xterm.js');
+            //     term.writeln('This is a local terminal emulation, without a real terminal in the back-end.');
+            //     term.writeln('Type some keys and commands to play around.');
+            //     term.writeln('');
+            //     prompt(term);
+
+            //     term.onKey(e => {
+            //         const printable = !e.domEvent.altKey && !e.domEvent.altGraphKey && !e.domEvent.ctrlKey && !e.domEvent.metaKey;
+
+            //         if (e.domEvent.keyCode === 13) {
+            //             prompt(term);
+            //         } else if (e.domEvent.keyCode === 8) {
+            //             // Do not delete the prompt
+            //             if (term._core.buffer.x > 2) {
+            //                 term.write('\b \b');
+            //             }
+            //         } else if (printable) {
+            //             term.write(e.key);
+            //         }
+            //     });
+            // }
+
+            // function prompt(term) {
+            //     term.write('\r\n$ ');
+            // }
+
+            // runFakeTerminal();
+
+
+            function loginWebSSH() {
+                var form = new FormData();
+                form.append("hostname", "119.29.19.38");
+                form.append("port", "22");
+                form.append("username", "root");
+                form.append("password", "Jz703505");
+                form.append("passphrase", "");
+                form.append("totp", "");
+                form.append("term", "xterm-256color");
+                form.append("_xsrf", "2|d72f26d2|ac366196ace54cbd5b5811f9cc1561b4|1693199391");
+
+                var settings = {
+                    "url": "http://localhost:8000",
+                    "method": "POST",
+                    "timeout": 0,
+                    "processData": false,
+                    "mimeType": "multipart/form-data",
+                    "contentType": false,
+                    "data": form
+                };
+
+                $.ajax(settings).done(function (response) {
+                    openWebSocket(response);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.error(textStatus, errorThrown);
+                });
+            }
+
+            function openWebSocket(response) {
+                var res = JSON.parse(response)
+                var url = 'ws://localhost:8000/ws?id=' + res.id;
+                sock = new window.WebSocket(url);
+                sock.onopen = function () {
+                    console.log('sock.onopen')
+                    term.open(terminal);
+                    term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
+                    term.setOption('fontSize', 16);
+                    term.setOption('theme', {background: '#000', foreground: '#fff'});
+                    term.writeln('Welcome to xterm.js');
+                    term.writeln('This is a local terminal emulation, without a real terminal in the back-end.');
+                    term.writeln('Type some keys and commands to play around.');
+                    term.writeln('');
+                    term.onKey(e => {
+                        var printable = !e.domEvent.altKey && !e.domEvent.altGraphKey && !e.domEvent.ctrlKey && !e.domEvent.metaKey;
+                        if (e.domEvent.keyCode === 13) {
+                            prompt(term);
+                        } else if (e.domEvent.keyCode === 8) {
+                            // Do not delete the prompt
+                            if (term._core.buffer.x > 2) {
+                                term.write('\b \b');
+                            }
+                        } else if (printable) {
+                            term.write(e.key);
+                        }
+                    });
+
+                    term.onData(function (data) {
+                        console.log('term.onData', data);
+                        sock.send(JSON.stringify({'data': data}));
+                    })
+                    prompt(term);
+                };
+
+                sock.onmessage = function (msg) {
+                    // console.log('sock.onmessage', msg)
+                    read_as_text_with_encoding(msg.data, term_write);
+                };
+
+                sock.onerror = function (e) {
+                    console.error(e);
+                };
+
+                sock.onclose = function (e) {
+                    console.log(e)
+                };
+            }
+
+            $('#btn').on('click', function () {
+                sendMessage();
+            });
+
+            function term_write(text) {
+                if (term) {
+                    term.write(text);
+                    // if (!term.resized) {
+                    //     resize_terminal(term);
+                    //     term.resized = true;
+                    // }
+                }
+            }
+
+            function sendMessage() {
+                var data = 'll'.trim() + '\r';
+                sock.send(JSON.stringify({'data': data}));
+            }
+
+            function read_as_text_with_encoding(file, callback, encoding) {
+                var reader = new window.FileReader();
+
+                if (encoding === undefined) {
+                    encoding = 'utf-8';
+                }
+
+                reader.onload = function () {
+                    if (callback) {
+                        callback(reader.result);
+                    }
+                };
+
+                reader.onerror = function (e) {
+                    console.error(e);
+                };
+
+                reader.readAsText(file, encoding);
+            }
+
+            function prompt(term) {
+                term.write('\r\n$ ');
+                sendCommand(term);
+            }
+
+            function sendCommand(cmd) {
+                if (sock && sock.readyState === WebSocket.OPEN) {
+                    console.log(cmd)
+                    sock.send(JSON.stringify({'data': cmd + '\r'}));
+                }
+            }
+
+        })
+    </script>
+</body>
+
 </html>
