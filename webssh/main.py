@@ -14,9 +14,12 @@ from webssh.settings import (
 class CORSRequestHandler(RequestHandler):
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Methods", "GET, HEAD, POST, DELETE, PATCH, PUT, OPTIONS")
-        self.set_header("Access-Control-Allow-Headers", "Content-Type")
+        self.set_header("Content-Security-Policy", "default-src 'self'")
+        self.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        self.set_header("Content-Type", "application/json; charset=UTF-8")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, x-requested-with")
         self.set_header("Access-Control-Allow-Credentials", "true")  # Allow cookies
+        self.set_header("Access-Control-Max-Age", 1000)
 
     def options(self):
         self.set_status(204)
@@ -28,8 +31,7 @@ def make_handlers(loop, options):
     policy = get_policy_setting(options, host_keys_settings)
 
     handlers = [
-        (r'/', IndexHandler, dict(loop=loop, policy=policy,
-                                  host_keys_settings=host_keys_settings)),
+        (r'/', IndexHandler, dict(loop=loop, policy=policy, host_keys_settings=host_keys_settings)),
         (r'/ws', WsockHandler, dict(loop=loop))
     ]
     return handlers
@@ -49,9 +51,7 @@ def app_listen(app, port, address, server_settings):
     else:
         server_type = 'https'
         handler.redirecting = True if options.redirect else False
-    logging.info(
-        'Listening on {}:{} ({})'.format(address, port, server_type)
-    )
+    logging.info('Listening on {}:{} ({})'.format(address, port, server_type))
 
 
 def main():

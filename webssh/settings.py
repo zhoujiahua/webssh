@@ -26,22 +26,19 @@ define('sslport', type=int, default=4433,  help='SSL listen port')
 define('certfile', default='', help='SSL certificate file')
 define('keyfile', default='', help='SSL private key file')
 define('debug', type=bool, default=True, help='Debug mode')
-define('policy', default='warning',
-       help='Missing host key policy, reject|autoadd|warning')
+define('policy', default='warning', help='Missing host key policy, reject|autoadd|warning')
 define('hostfile', default='', help='User defined host keys file')
 define('syshostfile', default='', help='System wide host keys file')
 define('tdstream', default='', help='Trusted downstream, separated by comma')
 define('redirect', type=bool, default=True, help='Redirecting http to https')
-define('fbidhttp', type=bool, default=True,
-       help='Forbid public plain http incoming requests')
+define('fbidhttp', type=bool, default=True, help='Forbid public plain http incoming requests')
 define('xheaders', type=bool, default=True, help='Support xheaders')
 define('xsrf', type=bool, default=True, help='CSRF protection')
-define('origin', default='same', help='''Origin policy,
+define('origin', default='*', help='''Origin policy,
 'same': same origin policy, matches host name and port number;
 'primary': primary domain policy, matches primary domain only;
 '<domains>': custom domains policy, matches any domain in the <domains> list
-separated by comma;
-'*': wildcard policy, matches any domain, allowed in debug mode only.''')
+separated by comma; '*': wildcard policy, matches any domain, allowed in debug mode only.''')
 define('wpintvl', type=float, default=0, help='Websocket ping interval')
 define('timeout', type=float, default=3, help='SSH connection timeout')
 define('delay', type=float, default=3, help='The delay to call recycle_worker')
@@ -184,9 +181,7 @@ def get_font_filename(font, font_dir):
                  and os.path.isfile(os.path.join(font_dir, f))}
     if font:
         if font not in filenames:
-            raise ValueError(
-                'Font file {!r} not found'.format(os.path.join(font_dir, font))
-            )
+            raise ValueError('Font file {!r} not found'.format(os.path.join(font_dir, font)))
     elif filenames:
         font = filenames.pop()
 
